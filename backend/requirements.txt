@@ -1,0 +1,59 @@
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+
+# TON Blockchain
+pytoniq==0.1.38
+pytoniq-core==0.1.35
+tonsdk==1.0.14
+
+# Message Queue
+aiokafka==0.10.0
+kafka-python==2.0.2
+
+# Vector Database & Search
+weaviate-client==4.4.0
+elasticsearch==8.11.1
+
+# AI/ML & NLP
+langchain==0.1.0
+langchain-community==0.0.10
+transformers==4.36.2
+torch==2.1.2
+sentence-transformers==2.2.2
+openai==1.7.2
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.3
+aiohttp==3.9.1
+beautifulsoup4==4.12.3
+feedparser==6.0.11
+
+# Caching & Task Queue
+redis==5.0.1
+celery==5.3.6
+
+# Monitoring & Logging
+prometheus-client==0.19.0
+python-json-logger==2.0.7
+sentry-sdk==1.39.2
+
+# Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Utilities
+python-dotenv==1.0.0
+httpx==0.26.0
+tenacity==8.2.3
+pyyaml==6.0.1
