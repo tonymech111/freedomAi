@@ -1,0 +1,217 @@
+;; Reputation & Staking Smart Contract
+;; Manages creator reputation and token staking for signal credibility
+
+#include "stdlib.fc";
+
+;; Storage
+;; admin_address - contract admin
+;; total_staked - total amount staked
+;; min_stake - minimum stake amount
+;; reputation_data - dictionary of creator reputations
+
+global slice admin_address;
+global int total_staked;
+global int min_stake;
+global cell reputation_data;
+
+() load_data() impure {
+    slice ds = get_data().begin_parse();
+    admin_address = ds~load_msg_addr();
+    total_staked = ds~load_coins();
+    min_stake = ds~load_coins();
+    reputation_data = ds~load_dict();
+}
+
+() save_data() impure {
+    set_data(begin_cell()
+        .store_slice(admin_address)
+        .store_coins(total_staked)
+        .store_coins(min_stake)
+        .store_dict(reputation_data)
+        .end_cell()
+    );
+}
+
+;; Stake tokens for a signal
+() stake_on_signal(slice creator_address, int signal_id, int amount) impure {
+    throw_unless(100, amount >= min_stake);
+    
+    ;; Get creator's current stake
+    (slice creator_data, int found) = reputation_data.udict_get?(256, slice_hash(creator_address));
+    
+    int current_stake = 0;
+    int reputation_score = 100;  ;; Default
+    int correct_signals = 0;
+    int total_signals = 0;
+    
+    if (found) {
+        current_stake = creator_data~load_coins();
+        reputation_score = creator_data~load_uint(32);
+        correct_signals = creator_data~load_uint(32);
+        total_signals = creator_data~load_uint(32);
+    }
+    
+    ;; Update stake
+    current_stake += amount;
+    total_staked += amount;
+    total_signals += 1;
+    
+    ;; Save updated data
+    cell new_creator_data = begin_cell()
+        .store_coins(current_stake)
+        .store_uint(reputation_score, 32)
+        .store_uint(correct_signals, 32)
+        .store_uint(total_signals, 32)
+        .end_cell()
+        .begin_parse();
+    
+    reputation_data~udict_set(256, slice_hash(creator_address), new_creator_data);
+    save_data();
+}
+
+;; Unstake tokens
+() unstake(slice creator_address, int amount) impure {
+    (slice creator_data, int found) = reputation_data.udict_get?(256, slice_hash(creator_address));
+    throw_unless(101, found);
+    
+    int current_stake = creator_data~load_coins();
+    throw_unless(102, current_stake >= amount);
+    
+    int reputation_score = creator_data~load_uint(32);
+    int correct_signals = creator_data~load_uint(32);
+    int total_signals = creator_data~load_uint(32);
+    
+    ;; Update stake
+    current_stake -= amount;
+    total_staked -= amount;
+    
+    ;; Save updated data
+    cell new_creator_data = begin_cell()
+        .store_coins(current_stake)
+        .store_uint(reputation_score, 32)
+        .store_uint(correct_signals, 32)
+        .store_uint(total_signals, 32)
+        .end_cell()
+        .begin_parse();
+    
+    reputation_data~udict_set(256, slice_hash(creator_address), new_creator_data);
+    save_data();
+    
+    ;; Return tokens to creator
+    var msg = begin_cell()
+        .store_uint(0x18, 6)
+        .store_slice(creator_address)
+        .store_coins(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .end_cell();
+    
+    send_raw_message(msg, 1);
+}
+
+;; Update reputation based on signal accuracy
+() update_reputation(slice creator_address, int is_correct) impure {
+    (slice creator_data, int found) = reputation_data.udict_get?(256, slice_hash(creator_address));
+    throw_unless(103, found);
+    
+    int current_stake = creator_data~load_coins();
+    int reputation_score = creator_data~load_uint(32);
+    int correct_signals = creator_data~load_uint(32);
+    int total_signals = creator_data~load_uint(32);
+    
+    ;; Update stats
+    if (is_correct) {
+        correct_signals += 1;
+        reputation_score += 10;  ;; Reward for correct signal
+    } else {
+        reputation_score -= 20;  ;; Penalty for incorrect signal
+        
+        ;; Slash stake
+        int slash_amount = current_stake / 10;  ;; 10% slash
+        current_stake -= slash_amount;
+        total_staked -= slash_amount;
+    }
+    
+    ;; Ensure reputation doesn't go below 0
+    if (reputation_score < 0) {
+        reputation_score = 0;
+    }
+    
+    ;; Save updated data
+    cell new_creator_data = begin_cell()
+        .store_coins(current_stake)
+        .store_uint(reputation_score, 32)
+        .store_uint(correct_signals, 32)
+        .store_uint(total_signals, 32)
+        .end_cell()
+        .begin_parse();
+    
+    reputation_data~udict_set(256, slice_hash(creator_address), new_creator_data);
+    save_data();
+}
+
+;; Get creator reputation
+(int, int, int, int) get_reputation(slice creator_address) method_id {
+    (slice creator_data, int found) = reputation_data.udict_get?(256, slice_hash(creator_address));
+    
+    if (~ found) {
+        return (0, 100, 0, 0);  ;; stake, reputation, correct, total
+    }
+    
+    int current_stake = creator_data~load_coins();
+    int reputation_score = creator_data~load_uint(32);
+    int correct_signals = creator_data~load_uint(32);
+    int total_signals = creator_data~load_uint(32);
+    
+    return (current_stake, reputation_score, correct_signals, total_signals);
+}
+
+;; Get contract stats
+(int, int) get_stats() method_id {
+    return (total_staked, min_stake);
+}
+
+;; Main receiver
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty?()) {
+        return ();
+    }
+    
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    
+    if (flags & 1) {
+        return ();
+    }
+    
+    load_data();
+    
+    slice sender_address = cs~load_msg_addr();
+    int op = in_msg_body~load_uint(32);
+    
+    ;; Stake operation
+    if (op == 1) {
+        int signal_id = in_msg_body~load_uint(64);
+        stake_on_signal(sender_address, signal_id, msg_value);
+        return ();
+    }
+    
+    ;; Unstake operation
+    if (op == 2) {
+        int amount = in_msg_body~load_coins();
+        unstake(sender_address, amount);
+        return ();
+    }
+    
+    ;; Update reputation (admin only)
+    if (op == 3) {
+        throw_unless(401, equal_slices(sender_address, admin_address));
+        
+        slice creator_address = in_msg_body~load_msg_addr();
+        int is_correct = in_msg_body~load_uint(1);
+        
+        update_reputation(creator_address, is_correct);
+        return ();
+    }
+    
+    throw(0xffff);
+}

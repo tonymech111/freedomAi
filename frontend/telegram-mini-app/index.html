@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>InfoFi - DeFi Intelligence</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 16px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--tg-theme-hint-color, #999999);
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-card .change {
+            font-size: 12px;
+            color: #10b981;
+            margin-top: 4px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .signal-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .signal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .signal-type {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: #3b82f6;
+            color: white;
+        }
+
+        .signal-confidence {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .signal-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .signal-description {
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #999999);
+            line-height: 1.4;
+        }
+
+        .whale-alert {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .whale-amount {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .whale-details {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--tg-theme-button-color, #3b82f6);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            margin-top: 8px;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: var(--tg-theme-button-color, #3b82f6);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔮 InfoFi</h1>
+        <p>AI-Powered DeFi Intelligence</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">Market Sentiment</div>
+            <div class="value">Bullish</div>
+            <div class="change">+12%</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Active Signals</div>
+            <div class="value">247</div>
+            <div class="change">+8 today</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Total Volume</div>
+            <div class="value">12.4M</div>
+            <div class="change">+23%</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Your Reputation</div>
+            <div class="value">850</div>
+            <div class="change">Top 5%</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('signals')">Signals</button>
+        <button class="tab" onclick="switchTab('whales')">Whale Alerts</button>
+        <button class="tab" onclick="switchTab('marketplace')">Marketplace</button>
+    </div>
+
+    <div id="signals-tab" class="section">
+        <div class="section-title">Recent Signals</div>
+        
+        <div class="signal-card">
+            <div class="signal-header">
+                <span class="signal-type">WHALE</span>
+                <span class="signal-confidence">85% confidence</span>
+            </div>
+            <div class="signal-title">Large Accumulation Detected</div>
+            <div class="signal-description">
+                Whale wallet accumulated 500K TON in the last 6 hours. Historical pattern suggests bullish momentum.
+            </div>
+        </div>
+
+        <div class="signal-card">
+            <div class="signal-header">
+                <span class="signal-type" style="background: #10b981;">SENTIMENT</span>
+                <span class="signal-confidence">72% confidence</span>
+            </div>
+            <div class="signal-title">Positive Social Sentiment</div>
+            <div class="signal-description">
+                Strong bullish sentiment across Twitter and Telegram. Trending topics indicate growing interest.
+            </div>
+        </div>
+
+        <button class="btn" onclick="viewAllSignals()">View All Signals</button>
+    </div>
+
+    <div id="whales-tab" class="section" style="display: none;">
+        <div class="section-title">🐋 Whale Alerts (24h)</div>
+        
+        <div class="whale-alert">
+            <div class="whale-amount">1.2M TON</div>
+            <div class="whale-details">
+                From: EQD...abc → To: Exchange<br>
+                2 hours ago
+            </div>
+        </div>
+
+        <div class="whale-alert">
+            <div class="whale-amount">850K TON</div>
+            <div class="whale-details">
+                From: Exchange → To: EQD...xyz<br>
+                5 hours ago
+            </div>
+        </div>
+
+        <button class="btn" onclick="viewAllWhales()">View All Whale Activity</button>
+    </div>
+
+    <div id="marketplace-tab" class="section" style="display: none;">
+        <div class="section-title">Info Marketplace</div>
+        
+        <div class="signal-card">
+            <div class="signal-title">Q4 2025 Whale Analysis Report</div>
+            <div class="signal-description">
+                Comprehensive analysis of top 100 whale wallets. Includes movement patterns and predictions.
+            </div>
+            <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600;">10 TON</span>
+                <span style="font-size: 12px; color: #10b981;">★ 4.8 (42 reviews)</span>
+            </div>
+        </div>
+
+        <button class="btn" onclick="browseMarketplace()">Browse Marketplace</button>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Set theme colors
+        document.body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#ffffff');
+        document.body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#000000');
+
+        function switchTab(tab) {
+            // Hide all tabs
+            document.getElementById('signals-tab').style.display = 'none';
+            document.getElementById('whales-tab').style.display = 'none';
+            document.getElementById('marketplace-tab').style.display = 'none';
+
+            // Show selected tab
+            document.getElementById(tab + '-tab').style.display = 'block';
+
+            // Update active tab button
+            document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function viewAllSignals() {
+            tg.showAlert('Opening full signals dashboard...');
+            // In production, navigate to full web app
+        }
+
+        function viewAllWhales() {
+            tg.showAlert('Opening whale tracker...');
+        }
+
+        function browseMarketplace() {
+            tg.showAlert('Opening marketplace...');
+        }
+
+        // Send user data to backend
+        tg.onEvent('mainButtonClicked', function() {
+            tg.sendData(JSON.stringify({
+                user_id: tg.initDataUnsafe.user?.id,
+                action: 'main_button_clicked'
+            }));
+        });
+    </script>
+</body>
+</html>
