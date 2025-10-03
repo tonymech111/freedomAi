@@ -1,12 +1,15 @@
-# Freedom AI - Decentralized Intelligence Marketplace on TON
+# InfoFi Platform
 
-The first decentralized marketplace for AI-powered trading signals on TON blockchain. Connect with top creators, share insights, and earn rewards for your expertise.
+A comprehensive DeFi intelligence platform built with React, TypeScript, and Python.
+
+🚀 **Live Demo**: [https://tonymech111.github.io/freedomAi/](https://tonymech111.github.io/freedomAi/)
+
+A decentralized marketplace for AI-powered trading signals on TON blockchain. Connect with top creators, share insights, and earn rewards for your expertise.
 
 ## 🏗️ Architecture
 
 ### 1. Data Layer
 - **On-Chain Indexer**: TON blockchain transaction monitoring, whale alerts, token flows
-- **Off-Chain Sources**: News feeds, Telegram channels, Twitter/X, GitHub activity
 - **ETL Pipeline**: Kafka-based data ingestion and normalization
 
 ### 2. Knowledge Layer
