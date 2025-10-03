@@ -34,17 +34,13 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: frontend/web-app/package-lock.json
+        cache-dependency-path: package-lock.json
         
     - name: Install dependencies
-      run: |
-        cd frontend/web-app
-        npm ci
+      run: npm ci
         
     - name: Build
-      run: |
-        cd frontend/web-app
-        npm run build
+      run: npm run build
         
     - name: Setup Pages
       uses: actions/configure-pages@v4
@@ -52,7 +48,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: frontend/web-app/dist
+        path: dist
         
     - name: Deploy to GitHub Pages
       id: deployment
