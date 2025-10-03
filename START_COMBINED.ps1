@@ -48,7 +48,7 @@ $infofiBackendJob = Start-Job -ScriptBlock {
     python -m uvicorn api.main_simple:app --host 0.0.0.0 --port 8000 --reload
 } -ArgumentList $infofiBackendPath
 
-Write-Host "✅ InfoFi Backend starting on http://localhost:8000" -ForegroundColor Green
+Write-Host "[OK] InfoFi Backend starting on http://localhost:8000" -ForegroundColor Green
 
 # Check if FreedomAI backend exists
 $freedomaiBackendPath = Join-Path $PSScriptRoot "freedomai-backend"
@@ -64,7 +64,7 @@ if (Test-Path $freedomaiBackendPath) {
         # Example: python app.py --port 8001
     } -ArgumentList $freedomaiBackendPath
     
-    Write-Host "✅ FreedomAI Backend starting on http://localhost:8001" -ForegroundColor Green
+    Write-Host "[OK] FreedomAI Backend starting on http://localhost:8001" -ForegroundColor Green
 }
 
 # Wait for InfoFi backend to be ready
@@ -87,7 +87,7 @@ while ($attempt -lt $maxAttempts -and -not $backendReady) {
 }
 
 if ($backendReady) {
-    Write-Host "✅ InfoFi Backend is ready!" -ForegroundColor Green
+    Write-Host "[OK] InfoFi Backend is ready!" -ForegroundColor Green
 } else {
     Write-Host "⚠️  InfoFi Backend may still be starting..." -ForegroundColor Yellow
 }
@@ -104,7 +104,7 @@ $infofiFrontendJob = Start-Job -ScriptBlock {
     npm run dev
 } -ArgumentList $infofiFrontendPath
 
-Write-Host "✅ InfoFi Frontend starting on http://localhost:5173" -ForegroundColor Green
+Write-Host "[OK] InfoFi Frontend starting on http://localhost:5173" -ForegroundColor Green
 
 # Check if FreedomAI frontend exists
 $freedomaiFrontendPath = Join-Path $PSScriptRoot "freedomai-frontend"
@@ -120,7 +120,7 @@ if (Test-Path $freedomaiFrontendPath) {
         # Example: npm run dev --port 3001
     } -ArgumentList $freedomaiFrontendPath
     
-    Write-Host "✅ FreedomAI Frontend starting on http://localhost:3001" -ForegroundColor Green
+    Write-Host "[OK] FreedomAI Frontend starting on http://localhost:3001" -ForegroundColor Green
 }
 
 Write-Host ""
@@ -209,5 +209,5 @@ try {
         Remove-Job -Id $freedomaiFrontendJob.Id -Force -ErrorAction SilentlyContinue
     }
     
-    Write-Host "✅ All services stopped" -ForegroundColor Green
+    Write-Host "All services stopped" -ForegroundColor Green
 }
