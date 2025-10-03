@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules/
 frontend/web-app/node_modules/
@@ -66,3 +67,6 @@ pnpm-lock.yaml
 
 # Docker
 .docker/
+=======
+node_modules
+>>>>>>> 22e4eadab2e1f7fed5f05733ac4082759ba56f04

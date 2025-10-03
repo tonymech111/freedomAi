@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # InfoFi Backend (DeFi Intelligence)
+  infofi-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: infofi-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/infofi
+      - REDIS_URL=redis://redis:6379/0
+      - TON_API_KEY=${TON_API_KEY}
+    volumes:
+      - ./backend:/app
+    command: uvicorn api.main_simple:app --host 0.0.0.0 --port 8000 --reload
+
+  # InfoFi Frontend (DeFi Dashboard)
+  infofi-frontend:
+    build:
+      context: ./frontend/web-app
+      dockerfile: Dockerfile
+    container_name: infofi-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend/web-app:/app
+      - /app/node_modules
+    command: npm run dev
+
+  # FreedomAI Backend (if exists)
+  freedomai-backend:
+    # Add your existing FreedomAI backend configuration here
+    build:
+      context: ./freedomai-backend  # Adjust path as needed
+    ports:
+      - "8001:8000"  # Different port to avoid conflicts
+    
+  # Shared Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: shared-postgres
+    environment:
+      POSTGRES_DB: combined_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Shared Redis
+  redis:
+    image: redis:7-alpine
+    container_name: shared-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    name: freedomai-infofi-network
