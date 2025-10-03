@@ -4,6 +4,8 @@ A comprehensive DeFi intelligence platform built with React, TypeScript, and Pyt
 
 🚀 **Live Demo**: [https://tonymech111.github.io/freedomAi/](https://tonymech111.github.io/freedomAi/)
 
+> **Status**: Deployment in progress - GitHub Pages enabled ✅
+
 A decentralized marketplace for AI-powered trading signals on TON blockchain. Connect with top creators, share insights, and earn rewards for your expertise.
 
 ## 🏗️ Architecture
